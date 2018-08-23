@@ -1,19 +1,13 @@
 library(lubridate)
-
-guineapig.df <- read.csv("data/guineapig-dental-original.csv")
-dates.df <- guineapig.df[, which(names(guineapig.df) %in% "weight_diagnosis_date" |
-                                 substr(names(guineapig.df), 1, 4) == "date" |
-                                 substr(names(guineapig.df), 1, 4) == "Date")]
-death.date <- dmy(dates.df[, 12])
-alive.date <- dmy(guineapig.df[, 164])
-da <- cbind(death.date, alive.date)
-## We have a zombie!
-which(!apply(da, 1, function(x) x[1] >= x[2]))
-
-names(dates.df)
-
-diagnosis.date <- guineapig.df[, 51]
-death.date <- as.character(guineapig.df[, 162])
-alive.date <- as.character(guineapig.df[, 164])
-
-dates.df[which(is.na(death.date) & is.na(alive.date)), ]
+## Loading in data.
+guineapig.df <- read.csv("data/guineapig-dental-original.csv", stringsAsFactors = FALSE)
+## Fixing the zombie guinea pig.
+guineapig.df[416, 164] <- "31/1/15"
+## Creating a data frame with only the dates.
+dates.df <- guineapig.df[, c(which(names(guineapig.df) %in% "weight_diagnosis_date" |
+                                   substr(names(guineapig.df), 1, 4) == "date" |
+                                   substr(names(guineapig.df), 1, 4) == "Date"), 164, 2)]
+## Checking for guinea pigs who were born after  having procedures.
+min.date <- dmy(apply(dates.df, 1, function(x) min(x[x != ""])))
+dob <- dmy(dates.df[, 14])
+which(dob > min.date)
